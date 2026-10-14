@@ -76,6 +76,23 @@ def get_forms(data, mood, tense):
 
     return result
 
+    entries = data["moods"][mood][tense]
+
+    result = {}
+
+    for entry in entries:
+
+        pronoun = entry.get("pr")
+
+        if not pronoun:
+            continue
+
+        result[pronoun] = strip_pronoun(
+            entry["c"][0]
+        )
+
+    return result
+
 
 def style_title(ws, text):
 

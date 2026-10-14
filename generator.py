@@ -160,3 +160,10 @@ def build_workbook(verb, payload):
             pronoun,
             ""
         )
+    output = BytesIO()
+
+    wb.save(output)
+
+    output.seek(0)
+
+    return output.getvalue()

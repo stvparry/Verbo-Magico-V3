@@ -161,7 +161,7 @@ def build_workbook(verb, payload):
 
     row = 7
 
-    persons = [
+persons = [
     "yo",
     "tú",
     "él",
@@ -172,16 +172,20 @@ def build_workbook(verb, payload):
 
 for pronoun in persons:
 
+    ws.cell(row, 1).value = pronoun
 
-        ws.cell(row, 1).value = pronoun
-        ws.cell(row, 2).value = present.get(
-            pronoun,
-            ""
-        )
-    output = BytesIO()
+    ws.cell(row, 2).value = present.get(
+        pronoun,
+        ""
+    )
 
-    wb.save(output)
+    row += 1
 
-    output.seek(0)
 
-    return output.getvalue()
+output = BytesIO()
+
+wb.save(output)
+
+output.seek(0)
+
+return output.getvalue()

@@ -161,31 +161,30 @@ def build_workbook(verb, payload):
 
     row = 7
 
-persons = [
-    "yo",
-    "tú",
-    "él",
-    "nosotros",
-    "vosotros",
-    "ellos",
-]
+    persons = [
+        "yo",
+        "tú",
+        "él",
+        "nosotros",
+        "vosotros",
+        "ellos",
+    ]
 
-for pronoun in persons:
+    for pronoun in persons:
 
-    ws.cell(row, 1).value = pronoun
+        ws.cell(row, 1).value = pronoun
 
-    ws.cell(row, 2).value = present.get(
-        pronoun,
-        ""
-    )
+        ws.cell(row, 2).value = present.get(
+            pronoun,
+            ""
+        )
 
-    row += 1
+        row += 1
 
+    output = BytesIO()
 
-output = BytesIO()
+    wb.save(output)
 
-wb.save(output)
+    output.seek(0)
 
-output.seek(0)
-
-return output.getvalue()
+    return output.getvalue()

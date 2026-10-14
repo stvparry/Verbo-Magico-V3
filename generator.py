@@ -2,57 +2,26 @@ from io import BytesIO
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
-from openpyxl.comments import Comment
 
 
 NAVY = "17365D"
 BLUE = "2F75B5"
 LIGHT = "D9EAF7"
-PALE = "EEF5FB"
 WHITE = "FFFFFF"
-GREY = "E7E6E6"
-
-
-DISPLAY_PERSONS = [
-    ("yo", ["yo"]),
-    ("tú", ["tú"]),
-    ("él / ella / usted", ["él", "ella", "usted"]),
-    ("nosotros / nosotras", ["nosotros", "nosotras"]),
-    ("vosotros / vosotras", ["vosotros", "vosotras"]),
-    ("ellos / ellas / ustedes", ["ellos", "ellas", "ustedes"]),
-]
-
-
-CORE_TENSES = [
-    ("indicativo", "presente"),
-    ("indicativo", "pretérito-perfecto-simple"),
-    ("indicativo", "pretérito-imperfecto"),
-    ("indicativo", "futuro"),
-    ("condicional", "presente"),
-]
-
-
-TENSE_NAMES = {
-    ("indicativo", "presente"): "Presente",
-    ("indicativo", "pretérito-perfecto-simple"): "Pretérito perfecto simple",
-    ("indicativo", "pretérito-imperfecto"): "Pretérito imperfecto",
-    ("indicativo", "futuro"): "Futuro simple",
-    ("condicional", "presente"): "Condicional simple",
-}
 
 
 def normalise(payload):
 
     if "value" not in payload:
         raise ValueError(
-            f"Expected 'value' key. Received: {list(payload.keys())}"
+            f"Expected 'value' key. Found: {list(payload.keys())}"
         )
 
     value = payload["value"]
 
     if "moods" not in value:
         raise ValueError(
-            f"Expected 'moods' key inside value. Received: {list(value.keys())}"
+            f"Expected 'moods' key. Found: {list(value.keys())}"
         )
 
     return value
@@ -92,13 +61,102 @@ def get_forms(data, mood, tense):
 
     entries = data["moods"][mood][tense]
 
-    by_pronoun = {}
+    result = {}
 
-    for e in entries:
+    for entry in entries:
 
-        pronoun = e.get("pr")
+        pronoun = entry.get("pr")
 
         if not pronoun:
             continue
 
-        by_pronoun[pronoun] = strip_pronoun(
+        result[pronoun] = strip_pronoun(
+            entry["c"][0]
+        )
+
+    return result
+
+
+def style_title(ws, text):
+
+    ws.merge_cells("A1:G1")
+
+    c = ws["A1"]
+
+    c.value = text
+
+    c.font = Font(
+        size=18,
+        bold=True,
+        color=WHITE,
+    )
+
+    c.fill = PatternFill(
+        "solid",
+        fgColor=NAVY,
+    )
+
+    c.alignment = Alignment(
+        horizontal="center",
+    )
+
+
+def build_workbook(verb, payload):
+
+    data = normalise(payload)
+
+    wb = Workbook()
+
+    ws = wb.active
+    ws.title = "Quick reference"
+
+    style_title(
+        ws,
+        f"{verb.upper()} conjugation",
+    )
+
+    ws["A3"] = "Infinitive"
+    ws["B3"] = verb
+
+    headers = [
+        "Person",
+        "Present",
+    ]
+
+    for col, header in enumerate(headers, start=1):
+
+        c = ws.cell(6, col)
+
+        c.value = header
+
+        c.fill = PatternFill(
+            "solid",
+            fgColor=LIGHT,
+        )
+
+        c.font = Font(
+            bold=True
+        )
+
+    present = get_forms(
+        data,
+        "indicativo",
+        "presente",
+    )
+
+    row = 7
+
+    for pronoun in [
+        "yo",
+        "tú",
+        "él",
+        "nosotros",
+        "vosotros",
+        "ellos",
+    ]:
+
+        ws.cell(row, 1).value = pronoun
+        ws.cell(row, 2).value = present.get(
+            pronoun,
+            ""
+        )

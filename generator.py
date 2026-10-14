@@ -3,7 +3,6 @@ from io import BytesIO
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 
-
 NAVY = "17365D"
 BLUE = "2F75B5"
 LIGHT = "D9EAF7"
@@ -25,7 +24,6 @@ def normalise(payload):
         )
 
     return value
-
 
 def strip_pronoun(text):
 
